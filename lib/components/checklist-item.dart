@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ChecklistItem extends StatelessWidget {
@@ -11,7 +12,7 @@ class ChecklistItem extends StatelessWidget {
       children: [
         Icon(
           Icons.check_box_outline_blank,
-          color: Colors.black,
+          color: CupertinoColors.black,
         ),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 5.0),

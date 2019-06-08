@@ -84,7 +84,7 @@ class Calendar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         boxShadow: [BoxShadow()],
-        color: Colors.white,
+        color: CupertinoColors.white,
       ),
       height: 250,
       child: Padding(
@@ -140,10 +140,10 @@ class Calendar extends StatelessWidget {
                 child: Icon(
                   Icons.arrow_downward,
                   color: Colors.red,
-                  size: 35.0,
+                  size: 30.0,
                 ),
               )
-            : Container(),
+            : Container(width: 30.0),
       ],
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'checklist-item.dart';
+import '../screens/create-card.dart';
 
 class Info extends StatelessWidget {
   @override
@@ -38,7 +39,12 @@ class Info extends StatelessWidget {
                 child: Container(
                   child: CupertinoButton.filled(
                     child: Text("Get Started"),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        CupertinoPageRoute(builder: (context) => CreateCard()),
+                      );
+                    },
                   ),
                 ),
               ),
