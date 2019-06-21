@@ -25,7 +25,8 @@ dependencies:
   cupertino_icons: ^0.1.2
   auto_size_text: ^1.1.2 
   image_picker: ^0.4.10
-  image: ^2.1.4
+  sqflite:
+  path:
 
 dev_dependencies:
   flutter_test:

@@ -1,26 +1,14 @@
 import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:leiterify/database.dart';
 
-class CreateCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text("Add Card(1/5)"),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: Text("Create"),
-          onPressed: () {},
-        ),
-      ),
-      child: CreatePage(),
-    );
-  }
-}
+import '../utils/drawing-elements.dart';
+import '../models/models.dart' as models;
 
 enum Tool {
   text,
@@ -67,11 +55,15 @@ class SideState {
   SideState(this.side);
 }
 
-class CreatePage extends StatefulWidget {
-  CreatePageState createState() => CreatePageState();
+class CreateCard extends StatefulWidget {
+  final int cardNumber;
+  final int totalCards;
+
+  CreateCard({this.cardNumber, this.totalCards});
+  CreateCardState createState() => CreateCardState();
 }
 
-class CreatePageState extends State<CreatePage> {
+class CreateCardState extends State<CreateCard> {
   final colors = [Colors.black, Colors.white] + Colors.primaries;
 
   Color _selectedColor = Colors.black;
@@ -81,42 +73,69 @@ class CreatePageState extends State<CreatePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: EdgeInsets.only(top: 100.0),
-      children: [
-        Text(_currentSide.side),
-        Container(
-          height: 300.0,
-          color: Colors.white,
-          child: CardCreator(
-            color: _selectedColor,
-            tool: _selectedTool,
-            text: _currentSide.text,
-            textColor: _currentSide.textColor,
-            image: _currentSide.image,
-            elements: _currentSide.elements,
-            fill: _currentSide.backgroundFill,
-            onElementUpdate: (elements) =>
-                setState(() => _currentSide.elements = elements),
-            onFillUpdate: (fill) =>
-                setState(() => _currentSide.backgroundFill = fill),
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: Text("Add Card(${widget.cardNumber}/${widget.totalCards})"),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: Text("Create"),
+          onPressed: () async {
+            await _persistCard();
+            var cardNumber = await DbProvider.db.queryCardsCreatedToday() + 1;
+
+            if (cardNumber > widget.totalCards) {
+              return Navigator.popUntil(context, ModalRoute.withName('/'));
+            } else {
+              Navigator.pushReplacementNamed(
+                context,
+                '/create-card',
+                arguments: cardNumber,
+              );
+            }
+          },
+        ),
+      ),
+      child: ListView(
+        padding: EdgeInsets.only(top: 100.0),
+        physics:
+            _selectedTool == Tool.text ? null : NeverScrollableScrollPhysics(),
+        children: [
+          Visibility(
+            child: Text(_currentSide.side),
           ),
-        ),
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 10.0),
-          child: _getToolBar(),
-        ),
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 10.0),
-          child: _getColorBar(),
-        ),
-      ]
-          .followedBy(_selectedTool == Tool.text
-              ? [
-                  Container(color: Colors.white, child: _getTextField()),
-                ]
-              : [])
-          .toList(),
+          Container(
+            height: 300.0,
+            color: Colors.white,
+            child: CardCreator(
+              color: _selectedColor,
+              tool: _selectedTool,
+              text: _currentSide.text,
+              textColor: _currentSide.textColor,
+              image: _currentSide.image,
+              elements: _currentSide.elements,
+              fill: _currentSide.backgroundFill,
+              onElementUpdate: (elements) =>
+                  setState(() => _currentSide.elements = elements),
+              onFillUpdate: (fill) =>
+                  setState(() => _currentSide.backgroundFill = fill),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 10.0),
+            child: _getToolBar(),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 10.0),
+            child: _getColorBar(),
+          ),
+        ]
+            .followedBy(_selectedTool == Tool.text
+                ? [
+                    Container(color: Colors.white, child: _getTextField()),
+                  ]
+                : [])
+            .toList(),
+      ),
     );
   }
 
@@ -207,67 +226,32 @@ class CreatePageState extends State<CreatePage> {
       ),
     );
   }
-}
 
-abstract class DrawingElement {
-  void draw(Canvas canvas, Size size);
-}
+  Future<void> _persistCard() async {
+    var card = models.Card(level: 1);
+    var frontSideState =
+        _currentSide.side == "Front" ? _currentSide : _otherSide;
+    var backSideState = _currentSide.side == "Back" ? _currentSide : _otherSide;
+    var frontSide = models.Side(
+      text: frontSideState.text,
+      textColor: frontSideState.textColor,
+      image: frontSideState.image,
+      elements: frontSideState.elements,
+      backgroundFill: frontSideState.backgroundFill == null
+          ? null
+          : frontSideState.backgroundFill.color,
+    );
+    var backSide = models.Side(
+      text: backSideState.text,
+      textColor: backSideState.textColor,
+      image: backSideState.image,
+      elements: backSideState.elements,
+      backgroundFill: backSideState.backgroundFill == null
+          ? null
+          : backSideState.backgroundFill.color,
+    );
 
-class Line extends DrawingElement {
-  List<Offset> _points = [];
-  final Color color;
-
-  Line(this.color);
-
-  @override
-  void draw(Canvas canvas, Size _) {
-    Paint paint = Paint()
-      ..color = this.color
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 5.0;
-
-    for (int i = 0; i < _points.length - 1; i++) {
-      canvas.drawLine(_points[i], _points[i + 1], paint);
-    }
-  }
-
-  void addPoint(Offset point) {
-    _points.add(point);
-  }
-
-  bool get isEmpty {
-    return _points.isEmpty;
-  }
-}
-
-class Fill extends DrawingElement {
-  final Color color;
-
-  Fill(this.color);
-
-  @override
-  void draw(Canvas canvas, Size _) {
-    Paint paint = Paint()..color = this.color;
-
-    canvas.drawPaint(paint);
-  }
-}
-
-class BackgroundImage extends DrawingElement {
-  ui.Image image;
-  BackgroundImage(this.image);
-
-  void draw(Canvas canvas, Size size) async {
-    if (image != null) {
-      var imgSize = Size(image.width.toDouble(), image.height.toDouble());
-      var imageRect = Offset.zero & imgSize;
-      var scale = size.height / imgSize.height;
-      var destWidth = image.width * scale;
-      var offsetX = (size.width - destWidth) / 2;
-      var destRect =
-          Offset(offsetX, 0.0) & Size(destWidth, image.height * scale);
-      canvas.drawImageRect(image, imageRect, destRect, Paint());
-    }
+    return DbProvider.db.createCard(card, frontSide, backSide);
   }
 }
 
@@ -302,7 +286,6 @@ class CardCreator extends StatefulWidget {
 }
 
 class CardCreatorState extends State<CardCreator> {
-  List<Offset> _points = [];
   BackgroundImage _backgroundImage;
 
   @override

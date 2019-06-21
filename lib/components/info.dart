@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:leiterify/database.dart';
 
 import 'checklist-item.dart';
-import '../screens/create-card.dart';
 
 class Info extends StatelessWidget {
   @override
@@ -39,11 +39,11 @@ class Info extends StatelessWidget {
                 child: Container(
                   child: CupertinoButton.filled(
                     child: Text("Get Started"),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        CupertinoPageRoute(builder: (context) => CreateCard()),
-                      );
+                    onPressed: () async {
+                      var cardNumber =
+                          await DbProvider.db.queryCardsCreatedToday() + 1;
+                      Navigator.pushNamed(context, '/create-card',
+                          arguments: cardNumber);
                     },
                   ),
                 ),
