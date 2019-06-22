@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:leiterify/database.dart';
+import 'package:leiterify/utils/app-state.dart';
 
 import '../utils/drawing-elements.dart';
 import '../models/models.dart' as models;
@@ -73,6 +74,7 @@ class CreateCardState extends State<CreateCard> {
 
   @override
   Widget build(BuildContext context) {
+    final data = App.of(context);
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: Text("Add Card(${widget.cardNumber}/${widget.totalCards})"),
@@ -80,8 +82,8 @@ class CreateCardState extends State<CreateCard> {
           padding: EdgeInsets.zero,
           child: Text("Create"),
           onPressed: () async {
-            await _persistCard();
-            var cardNumber = await DbProvider.db.queryCardsCreatedToday() + 1;
+            await _persistCard(context);
+            var cardNumber = data.cardsAddedToday + 1;
 
             if (cardNumber > widget.totalCards) {
               return Navigator.popUntil(context, ModalRoute.withName('/'));
@@ -227,7 +229,7 @@ class CreateCardState extends State<CreateCard> {
     );
   }
 
-  Future<void> _persistCard() async {
+  Future<void> _persistCard(BuildContext context) async {
     var card = models.Card(level: 1);
     var frontSideState =
         _currentSide.side == "Front" ? _currentSide : _otherSide;
@@ -251,7 +253,8 @@ class CreateCardState extends State<CreateCard> {
           : backSideState.backgroundFill.color,
     );
 
-    return DbProvider.db.createCard(card, frontSide, backSide);
+    await DbProvider.db.createCard(card, frontSide, backSide);
+    App.of(context).cardsAddedToday += 1;
   }
 }
 

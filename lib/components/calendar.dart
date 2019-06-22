@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:leiterify/utils/app-state.dart';
 
 const leitnerDays = {
   1: [2, 1],
@@ -91,23 +92,24 @@ class Calendar extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 10.0),
         child: ListView(
           scrollDirection: Axis.horizontal,
-          children: _generateCalendarDays(),
+          children: _generateCalendarDays(context),
         ),
       ),
     );
   }
 
-  List<Widget> _generateCalendarDays() {
+  List<Widget> _generateCalendarDays(BuildContext context) {
+    final data = App.of(context);
     final days = List<Widget>();
 
-    for (int i = 1; i <= 64; i++) {
-      days.add(_generateDay(i));
+    for (int i = data.day; i <= 63 + data.day; i++) {
+      days.add(_generateDay((i - 1) % 64 + 1, data.day));
     }
 
     return days;
   }
 
-  Widget _generateDay(int i) {
+  Widget _generateDay(int i, int today) {
     final levels = List<Widget>();
     final day = leitnerDays[i];
 
@@ -134,7 +136,7 @@ class Calendar extends StatelessWidget {
             children: levels,
           ),
         ),
-        i == 1
+        i == today
             ? Align(
                 alignment: Alignment.topCenter,
                 child: Icon(

@@ -67,4 +67,10 @@ class DbProvider {
         'SELECT COUNT(*) FROM cards WHERE created_at BETWEEN ? AND ?',
         [start, end]));
   }
+
+  Future<int> queryCardCountByLevel(int level) async {
+    final db = await database;
+    return Sqflite.firstIntValue(await db
+        .rawQuery('SELECT COUNT(*) FROM cards WHERE level = ?', [level]));
+  }
 }
