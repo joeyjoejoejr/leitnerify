@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'screens/home.dart';
 import 'screens/create-card.dart';
+import 'screens/creation-complete.dart';
 import 'utils/app-state.dart';
 
 void main() async {
@@ -29,9 +30,13 @@ class MyApp extends StatelessWidget {
         '/create-card': (BuildContext context) {
           final cardNumber = ModalRoute.of(context).settings.arguments;
           return Container(
-              child: CreateCard(
-                  cardNumber: cardNumber, totalCards: data.cardsPerDay));
+            child: CreateCard(
+                cardNumber: cardNumber, totalCards: data.cardsPerDay),
+          );
         },
+        '/creation-complete': (BuildContext context) => Container(
+              child: CreationComplete(),
+            ),
       },
     );
   }

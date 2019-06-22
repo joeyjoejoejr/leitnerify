@@ -86,7 +86,10 @@ class CreateCardState extends State<CreateCard> {
             var cardNumber = data.cardsAddedToday + 1;
 
             if (cardNumber > widget.totalCards) {
-              return Navigator.popUntil(context, ModalRoute.withName('/'));
+              return Navigator.pushReplacementNamed(
+                context,
+                '/creation-complete',
+              );
             } else {
               Navigator.pushReplacementNamed(
                 context,

@@ -61,11 +61,18 @@ class Info extends StatelessWidget {
             child: Text("Get Started"),
             onPressed: () {
               var cardNumber = data.cardsAddedToday + 1;
-              Navigator.pushNamed(
-                context,
-                '/create-card',
-                arguments: cardNumber,
-              );
+              if (data.cardsAddedToday >= data.cardsPerDay) {
+                Navigator.pushNamed(
+                  context,
+                  '/review-cards',
+                );
+              } else {
+                Navigator.pushNamed(
+                  context,
+                  '/create-card',
+                  arguments: cardNumber,
+                );
+              }
             },
           ),
         ),
