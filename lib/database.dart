@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:leiterify/components/calendar.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -72,5 +73,38 @@ class DbProvider {
     final db = await database;
     return Sqflite.firstIntValue(await db
         .rawQuery('SELECT COUNT(*) FROM cards WHERE level = ?', [level]));
+  }
+
+  Future<Card> queryNextCardByDay(int day) async {
+    final db = await database;
+    final levels = leitnerDays[day];
+
+    for (int level in levels) {
+      if (await queryCardCountByLevel(level) > 0) {
+        List<Map<String, dynamic>> cards = await db.rawQuery(
+          'SELECT * FROM cards WHERE level = ? ORDER BY RANDOM() LIMIT 1',
+          [level],
+        );
+        final card = Card.fromMap(cards.first);
+
+        List<Map<String, dynamic>> frontSides = await db.rawQuery(
+          'SELECT * FROM sides WHERE id = ?',
+          [card.frontSideId],
+        );
+        final frontSide = Side.fromMap(frontSides.first);
+        card.frontSide = frontSide;
+
+        List<Map<String, dynamic>> backSides = await db.rawQuery(
+          'SELECT * FROM sides WHERE id = ?',
+          [card.backSideId],
+        );
+        final backSide = Side.fromMap(backSides.first);
+        card.backSide = backSide;
+
+        return card;
+      }
+    }
+
+    return null;
   }
 }

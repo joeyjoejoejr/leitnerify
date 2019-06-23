@@ -7,6 +7,9 @@ class Card {
   int backSideId;
   DateTime createdAt;
 
+  Side frontSide;
+  Side backSide;
+
   Card({
     this.id,
     this.level,

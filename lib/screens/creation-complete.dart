@@ -1,20 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:leiterify/screens/review-cards.dart';
+import 'package:leiterify/utils/app-state.dart';
 
 class CreationComplete extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final data = App.of(context);
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           child: Text("Continue"),
-          onPressed: () {
-            Navigator.pushNamed(
-              context,
-              '/review-cards',
-            );
-          },
+          onPressed: () => navigateToReviewCards(context, data.day),
         ),
       ),
       child: Center(

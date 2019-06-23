@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:leiterify/screens/review-cards.dart';
 
 import 'screens/home.dart';
 import 'screens/create-card.dart';
@@ -37,6 +38,8 @@ class MyApp extends StatelessWidget {
         '/creation-complete': (BuildContext context) => Container(
               child: CreationComplete(),
             ),
+        '/review-cards': (BuildContext context) =>
+            Container(child: ReviewCards()),
       },
     );
   }

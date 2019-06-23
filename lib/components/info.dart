@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../utils/app-state.dart';
+import '../screens/review-cards.dart';
 import 'checklist-item.dart';
 
 class Info extends StatelessWidget {
@@ -62,10 +63,7 @@ class Info extends StatelessWidget {
             onPressed: () {
               var cardNumber = data.cardsAddedToday + 1;
               if (data.cardsAddedToday >= data.cardsPerDay) {
-                Navigator.pushNamed(
-                  context,
-                  '/review-cards',
-                );
+                navigateToReviewCards(context, data.day);
               } else {
                 Navigator.pushNamed(
                   context,

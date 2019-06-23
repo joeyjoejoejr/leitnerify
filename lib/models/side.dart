@@ -20,11 +20,20 @@ class Side {
   Side.fromMap(Map<String, dynamic> map) {
     id = map['id'];
     text = map['text'];
-    textColor = Color(map['text_color']);
-    backgroundFill = Color(map['background_fill']);
-    elements = jsonDecode(map['elements']);
+    if (map['text_color'] != null) {
+      textColor = Color(map['text_color']);
+    }
+    if (map['background_fill'] != null) {
+      backgroundFill = Color(map['background_fill']);
+    }
+    List<dynamic> json = jsonDecode(map['elements']);
+    elements = json.map((element) => DrawingElement.fromJson(element)).toList();
 
-    _imageLoaded = _loadImage(map['image']);
+    if (map['image'] != null) {
+      _imageLoaded = _loadImage(map['image']);
+    } else {
+      _imageLoaded = Future.value(null);
+    }
   }
 
   Future _loadImage(Uint8List data) async {
