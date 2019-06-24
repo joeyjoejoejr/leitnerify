@@ -48,9 +48,10 @@ class Side {
     Uint8List bytes;
 
     if (image != null) {
-      final data = await image.toByteData();
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
       final buffer = data.buffer;
       bytes = buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      await _loadImage(bytes);
     }
 
     return {

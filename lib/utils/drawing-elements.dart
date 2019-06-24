@@ -22,14 +22,16 @@ abstract class DrawingElement {
 
 class Line extends DrawingElement {
   List<Offset> _points = [];
-  final Color color;
+  Color color;
 
   Line(this.color);
-  Line.fromJson(Map<String, dynamic> json)
-      : _points = (json['points'] as List<List<double>>)
-            .map((list) => Offset(list[0], list[1]))
-            .toList(),
-        color = Color(json['color']);
+  Line.fromJson(Map<String, dynamic> json) {
+    print(json['points']);
+    _points = List<List>.from(json['points'])
+        .map((list) => Offset(list[0], list[1]))
+        .toList();
+    color = Color(json['color']);
+  }
 
   @override
   void draw(Canvas canvas, Size _) {

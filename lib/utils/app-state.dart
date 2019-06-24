@@ -56,7 +56,7 @@ class AppState extends State<App> {
   _init() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final int day = prefs.getInt('day') ?? 1;
-    final int cardsPerDay = prefs.getInt('cards_per_day') ?? 5;
+    final int cardsPerDay = prefs.getInt('cards_per_day') ?? 1;
     final int cardsAddedToday = await DbProvider.db.queryCardsCreatedToday();
 
     List<LeitnerLevel> reviewCards = [];

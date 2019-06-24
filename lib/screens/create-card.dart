@@ -10,6 +10,7 @@ import 'package:leiterify/utils/app-state.dart';
 
 import '../utils/drawing-elements.dart';
 import '../models/models.dart' as models;
+import '../utils/card-painter.dart';
 
 enum Tool {
   text,
@@ -366,20 +367,4 @@ class CardCreatorState extends State<CardCreator> {
       widget.onFillUpdate(Fill(widget.color));
     }
   }
-}
-
-class CardPainter extends CustomPainter {
-  CardPainter(this.elements);
-
-  final List<DrawingElement> elements;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
-    canvas.clipRect(rect);
-    elements.forEach((el) => el.draw(canvas, size));
-  }
-
-  @override
-  bool shouldRepaint(CardPainter other) => other.elements != elements;
 }
