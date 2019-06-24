@@ -29,29 +29,44 @@ void navigateToReviewCards(BuildContext context, int day) async {
   }
 }
 
-class ReviewCards extends StatelessWidget {
+class ReviewCards extends StatefulWidget {
+  ReviewCardsState createState() => ReviewCardsState();
+}
+
+class ReviewCardsState extends State<ReviewCards> {
+  models.Side currentSide;
+  String sideName = "Front";
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ReviewCardsArguments args = ModalRoute.of(context).settings.arguments;
+    currentSide = args.card.frontSide;
+  }
+
   @override
   Widget build(BuildContext context) {
     final ReviewCardsArguments args = ModalRoute.of(context).settings.arguments;
-    final front = args.card.frontSide;
-    List<DrawingElement> paintElements = List.from(front.elements);
-    if (front.image != null) {
-      paintElements.insert(0, BackgroundImage(front.image));
+    final card = args.card;
+
+    List<DrawingElement> paintElements = List.from(currentSide.elements);
+    if (currentSide.image != null) {
+      paintElements.insert(0, BackgroundImage(currentSide.image));
     }
-    if (front.backgroundFill != null) {
-      paintElements.insert(0, Fill(front.backgroundFill));
+    if (currentSide.backgroundFill != null) {
+      paintElements.insert(0, Fill(currentSide.backgroundFill));
     }
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: Text("Reviewing Level ${args.card.level} Cards"),
+        middle: Text("Reviewing Level ${card.level} Cards"),
       ),
       child: ListView(
         padding: EdgeInsets.only(top: 100.0),
         physics: NeverScrollableScrollPhysics(),
         children: [
           Visibility(
-            child: Text("Front"),
+            child: Text(sideName),
           ),
           Container(
             height: 300.0,
@@ -65,17 +80,50 @@ class ReviewCards extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                 child: Center(
                   child: AutoSizeText(
-                    front.text,
+                    currentSide.text,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: front.textColor, fontSize: 32.0),
+                    style:
+                        TextStyle(color: currentSide.textColor, fontSize: 32.0),
                     maxLines: 2,
                   ),
                 ),
               ),
             ]),
           ),
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 10.0),
+            child: currentSide.id == card.frontSide.id
+                ? _getFrontBar(card)
+                : _getFrontBar(card),
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _getFrontBar(models.Card card) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: () => setState(() {
+                currentSide = card.backSide;
+                sideName = "Back";
+              }),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.white, width: 5.0),
+              color: Colors.white,
+            ),
+            child: Icon(
+              Icons.replay,
+              color: Colors.black,
+              size: 32.0,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

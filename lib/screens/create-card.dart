@@ -163,7 +163,10 @@ class CreateCardState extends State<CreateCard> {
   }
 
   void _getImage() async {
-    var file = await ImagePicker.pickImage(source: ImageSource.gallery);
+    var file = await ImagePicker.pickImage(
+      source: ImageSource.gallery,
+      maxHeight: 300.0,
+    );
     if (file == null) return;
     var fileData = await file.readAsBytes();
     var codec = await ui.instantiateImageCodec(fileData);
