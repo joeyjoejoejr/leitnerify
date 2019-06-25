@@ -79,27 +79,30 @@ class ReviewCardsState extends State<ReviewCards> {
           Visibility(
             child: Text(sideName),
           ),
-          Container(
-            height: 300.0,
-            color: Colors.white,
-            child: Stack(children: [
-              CustomPaint(
-                painter: CardPainter(paintElements),
-                size: Size.infinite,
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.0),
-                child: Center(
-                  child: AutoSizeText(
-                    currentSide.text,
-                    textAlign: TextAlign.center,
-                    style:
-                        TextStyle(color: currentSide.textColor, fontSize: 32.0),
-                    maxLines: 2,
+          AspectRatio(
+            aspectRatio: 5.0 / 3.0,
+            child: Container(
+              height: 300.0,
+              color: Colors.white,
+              child: Stack(children: [
+                CustomPaint(
+                  painter: CardPainter(paintElements),
+                  size: Size.infinite,
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Center(
+                    child: AutoSizeText(
+                      currentSide.text,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: currentSide.textColor, fontSize: 32.0),
+                      maxLines: 2,
+                    ),
                   ),
                 ),
-              ),
-            ]),
+              ]),
+            ),
           ),
           Container(
             margin: EdgeInsets.symmetric(vertical: 10.0),

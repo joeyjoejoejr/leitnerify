@@ -109,21 +109,23 @@ class CreateCardState extends State<CreateCard> {
           Visibility(
             child: Text(_currentSide.side),
           ),
-          Container(
-            height: 300.0,
-            color: Colors.white,
-            child: CardCreator(
-              color: _selectedColor,
-              tool: _selectedTool,
-              text: _currentSide.text,
-              textColor: _currentSide.textColor,
-              image: _currentSide.image,
-              elements: _currentSide.elements,
-              fill: _currentSide.backgroundFill,
-              onElementUpdate: (elements) =>
-                  setState(() => _currentSide.elements = elements),
-              onFillUpdate: (fill) =>
-                  setState(() => _currentSide.backgroundFill = fill),
+          AspectRatio(
+            aspectRatio: 5.0 / 3.0,
+            child: Container(
+              color: Colors.white,
+              child: CardCreator(
+                color: _selectedColor,
+                tool: _selectedTool,
+                text: _currentSide.text,
+                textColor: _currentSide.textColor,
+                image: _currentSide.image,
+                elements: _currentSide.elements,
+                fill: _currentSide.backgroundFill,
+                onElementUpdate: (elements) =>
+                    setState(() => _currentSide.elements = elements),
+                onFillUpdate: (fill) =>
+                    setState(() => _currentSide.backgroundFill = fill),
+              ),
             ),
           ),
           Container(
