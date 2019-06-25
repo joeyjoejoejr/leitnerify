@@ -32,6 +32,7 @@ class DbProvider {
             "level INTEGER NOT NULL DEFAULT 1,"
             "front_side_id INTEGER NOT NULL,"
             "back_side_id INTEGER NOT NULL,"
+            "promoted_at INTEGER,"
             "created_at INTEGER NOT NULL"
             ")");
         await db.execute("CREATE TABLE sides ("
@@ -71,8 +72,14 @@ class DbProvider {
 
   Future<int> queryCardCountByLevel(int level) async {
     final db = await database;
-    return Sqflite.firstIntValue(await db
-        .rawQuery('SELECT COUNT(*) FROM cards WHERE level = ?', [level]));
+    final today = DateTime.now();
+    final start =
+        DateTime(today.year, today.month, today.day).millisecondsSinceEpoch;
+    final end = DateTime(today.year, today.month, today.day, 23, 59, 59)
+        .millisecondsSinceEpoch;
+    return Sqflite.firstIntValue(await db.rawQuery(
+        'SELECT COUNT(*) FROM cards WHERE level = ? AND promoted_at IS NULL OR promoted_at NOT BETWEEN ? AND ?',
+        [level, start, end]));
   }
 
   Future<Card> queryNextCardByDay(int day) async {
@@ -106,5 +113,16 @@ class DbProvider {
     }
 
     return null;
+  }
+
+  Future<void> updateCard(Card card) async {
+    final db = await database;
+
+    return db.update(
+      "cards",
+      card.toMap(),
+      where: "id = ?",
+      whereArgs: [card.id],
+    );
   }
 }

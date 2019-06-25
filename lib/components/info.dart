@@ -25,6 +25,8 @@ class Info extends StatelessWidget {
 
   List<Widget> _getChildren(BuildContext context) {
     final data = App.of(context);
+    final isDoneToday = data.completedReviewAt != null ??
+        data.completedReviewAt.difference(DateTime.now()).inDays == 0;
     final children = [
       Padding(
         padding: EdgeInsets.only(bottom: 10.0),
@@ -50,7 +52,9 @@ class Info extends StatelessWidget {
         Padding(
           padding: EdgeInsets.all(5.0),
           child: ChecklistItem(
-              "Review Level ${level.level} Cards (${level.numCards})"),
+            "Review Level ${level.level} Cards (${level.numCards})",
+            checked: isDoneToday || level.isComplete,
+          ),
         ),
       );
     }
@@ -58,21 +62,26 @@ class Info extends StatelessWidget {
       Padding(
         padding: EdgeInsets.symmetric(vertical: 10.0),
         child: Container(
-          child: CupertinoButton.filled(
-            child: Text("Get Started"),
-            onPressed: () {
-              var cardNumber = data.cardsAddedToday + 1;
-              if (data.cardsAddedToday >= data.cardsPerDay) {
-                navigateToReviewCards(context, data.day);
-              } else {
-                Navigator.pushNamed(
-                  context,
-                  '/create-card',
-                  arguments: cardNumber,
-                );
-              }
-            },
-          ),
+          child: isDoneToday
+              ? CupertinoButton.filled(
+                  child: Text("Done For Today"),
+                  onPressed: null,
+                )
+              : CupertinoButton.filled(
+                  child: Text("Get Started"),
+                  onPressed: () {
+                    var cardNumber = data.cardsAddedToday + 1;
+                    if (data.cardsAddedToday >= data.cardsPerDay) {
+                      navigateToReviewCards(context, data.day, first: true);
+                    } else {
+                      Navigator.pushNamed(
+                        context,
+                        '/create-card',
+                        arguments: cardNumber,
+                      );
+                    }
+                  },
+                ),
         ),
       ),
     );

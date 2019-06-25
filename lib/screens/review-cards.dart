@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:leiterify/database.dart';
+import 'package:leiterify/utils/app-state.dart';
 import 'package:leiterify/utils/card-painter.dart';
 import 'package:leiterify/utils/drawing-elements.dart';
 
@@ -13,18 +14,28 @@ class ReviewCardsArguments {
   ReviewCardsArguments(this.card);
 }
 
-void navigateToReviewCards(BuildContext context, int day) async {
+void navigateToReviewCards(BuildContext context, int day,
+    {bool first = false}) async {
   final card = await DbProvider.db.queryNextCardByDay(day);
-  if (card != null) {
+  final state = App.of(context);
+
+  if (card != null && first) {
     Navigator.pushNamed(
       context,
       '/review-cards',
       arguments: ReviewCardsArguments(card),
     );
-  } else {
-    Navigator.pushNamed(
+  } else if (card != null) {
+    Navigator.pushReplacementNamed(
       context,
-      '/review-complete',
+      '/review-cards',
+      arguments: ReviewCardsArguments(card),
+    );
+  } else {
+    await state.completeReview();
+    Navigator.popUntil(
+      context,
+      ModalRoute.withName('/'),
     );
   }
 }
@@ -94,7 +105,7 @@ class ReviewCardsState extends State<ReviewCards> {
             margin: EdgeInsets.symmetric(vertical: 10.0),
             child: currentSide.id == card.frontSide.id
                 ? _getFrontBar(card)
-                : _getFrontBar(card),
+                : _getBackBar(context, card),
           ),
         ],
       ),
@@ -119,6 +130,60 @@ class ReviewCardsState extends State<ReviewCards> {
             child: Icon(
               Icons.replay,
               color: Colors.black,
+              size: 32.0,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _getBackBar(BuildContext context, models.Card card) {
+    final state = App.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: () async {
+            int level = card.level;
+            card.promote();
+            await DbProvider.db.updateCard(card);
+            final numInLevel = await DbProvider.db.queryCardCountByLevel(level);
+            if (numInLevel == 0) {
+              state.completeLevel(level);
+            }
+            navigateToReviewCards(context, state.day);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.white, width: 5.0),
+              color: Colors.white,
+            ),
+            child: Icon(
+              Icons.thumb_up,
+              color: Colors.green,
+              size: 32.0,
+            ),
+          ),
+        ),
+        Container(
+          width: 37.0,
+        ),
+        GestureDetector(
+          onTap: () async {
+            card.level = 1;
+            await DbProvider.db.updateCard(card);
+            navigateToReviewCards(context, state.day);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.white, width: 5.0),
+              color: Colors.white,
+            ),
+            child: Icon(
+              Icons.thumb_down,
+              color: Colors.red,
               size: 32.0,
             ),
           ),

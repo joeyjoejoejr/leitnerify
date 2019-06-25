@@ -5,6 +5,7 @@ class Card {
   int level;
   int frontSideId;
   int backSideId;
+  DateTime promotedAt;
   DateTime createdAt;
 
   Side frontSide;
@@ -15,6 +16,7 @@ class Card {
     this.level,
     this.frontSideId,
     this.backSideId,
+    this.promotedAt,
     this.createdAt,
   });
 
@@ -23,6 +25,9 @@ class Card {
         level = map['level'],
         frontSideId = map['front_side_id'],
         backSideId = map['back_side_id'],
+        promotedAt = map['promoted_at'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(map['promoted_at'])
+            : null,
         createdAt = DateTime.fromMillisecondsSinceEpoch(map['created_at']);
 
   Map<String, dynamic> toMap() {
@@ -31,7 +36,14 @@ class Card {
       'level': level,
       'front_side_id': frontSideId,
       'back_side_id': backSideId,
+      'promoted_at':
+          promotedAt != null ? promotedAt.millisecondsSinceEpoch : null,
       'created_at': createdAt.millisecondsSinceEpoch,
     };
+  }
+
+  void promote() {
+    level += 1;
+    promotedAt = DateTime.now();
   }
 }

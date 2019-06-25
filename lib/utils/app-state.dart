@@ -24,6 +24,7 @@ class AppState extends State<App> {
   int _cardsAddedToday;
   int _day;
   TimeOfDay _notificationTime;
+  DateTime _completedReviewAt;
   List<LeitnerLevel> _reviewCards;
 
   bool _loaded = false;
@@ -33,6 +34,7 @@ class AppState extends State<App> {
   int get cardsAddedToday => _cardsAddedToday;
   set cardsAddedToday(int val) => setState(() => _cardsAddedToday = val);
   int get day => _day;
+  DateTime get completedReviewAt => _completedReviewAt;
   List<LeitnerLevel> get reviewCards => _reviewCards;
 
   TimeOfDay get notificationTime => _notificationTime;
@@ -55,9 +57,17 @@ class AppState extends State<App> {
 
   _init() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    // TODO: Remove this
+    prefs.clear();
     final int day = prefs.getInt('day') ?? 1;
     final int cardsPerDay = prefs.getInt('cards_per_day') ?? 1;
     final int cardsAddedToday = await DbProvider.db.queryCardsCreatedToday();
+    final DateTime completedReviewAt =
+        prefs.getInt('completed_review_at') != null
+            ? DateTime.fromMillisecondsSinceEpoch(
+                prefs.getInt('completed_review_at'),
+              )
+            : null;
 
     List<LeitnerLevel> reviewCards = [];
     for (int level in leitnerDays[day]) {
@@ -78,9 +88,25 @@ class AppState extends State<App> {
         hour: prefs.getInt('notification_hour') ?? 17,
         minute: prefs.getInt('notification_minute') ?? 0,
       );
+      _completedReviewAt = completedReviewAt;
       _reviewCards = reviewCards;
       _loaded = true;
     });
+  }
+
+  completeReview() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final date = DateTime.now();
+    await prefs.setInt('day', day + 1);
+    await prefs.setInt('completed_review_at', date.millisecondsSinceEpoch);
+    setState(() {
+      _completedReviewAt = date;
+      _day = day + 1;
+    });
+  }
+
+  void completeLevel(int level) {
+    _reviewCards.firstWhere((l) => level == l.level).isComplete = true;
   }
 }
 
@@ -96,5 +122,6 @@ class _AppStateInherited extends InheritedWidget {
 class LeitnerLevel {
   int level;
   int numCards;
+  bool isComplete = false;
   LeitnerLevel(this.level, this.numCards);
 }
