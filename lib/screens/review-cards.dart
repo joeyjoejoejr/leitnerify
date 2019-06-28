@@ -1,17 +1,18 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:leiterify/database.dart';
 import 'package:leiterify/utils/app-state.dart';
 import 'package:leiterify/utils/card-painter.dart';
 import 'package:leiterify/utils/drawing-elements.dart';
+import 'package:leiterify/utils/platform.dart';
 
 import '../models/models.dart' as models;
 
 class ReviewCardsArguments {
   final models.Card card;
+  bool replace = false;
 
-  ReviewCardsArguments(this.card);
+  ReviewCardsArguments({@required this.card, this.replace});
 }
 
 void navigateToReviewCards(BuildContext context, int day,
@@ -23,19 +24,19 @@ void navigateToReviewCards(BuildContext context, int day,
     Navigator.pushNamed(
       context,
       '/review-cards',
-      arguments: ReviewCardsArguments(card),
+      arguments: ReviewCardsArguments(card: card),
     );
   } else if (card != null) {
     Navigator.pushReplacementNamed(
       context,
       '/review-cards',
-      arguments: ReviewCardsArguments(card),
+      arguments: ReviewCardsArguments(card: card, replace: true),
     );
   } else {
     await state.completeReview();
-    Navigator.popUntil(
+    Navigator.pushReplacementNamed(
       context,
-      ModalRoute.withName('/'),
+      '/review-complete',
     );
   }
 }
@@ -52,6 +53,7 @@ class ReviewCardsState extends State<ReviewCards> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ReviewCardsArguments args = ModalRoute.of(context).settings.arguments;
+    print("Route: ${ModalRoute.of(context).settings}");
     currentSide = args.card.frontSide;
   }
 
@@ -68,9 +70,9 @@ class ReviewCardsState extends State<ReviewCards> {
       paintElements.insert(0, Fill(currentSide.backgroundFill));
     }
 
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text("Reviewing Level ${card.level} Cards"),
+    return PlatformScaffold(
+      navigationBar: PlatformAppBar(
+        title: Text("Reviewing Level ${card.level} Cards"),
       ),
       child: ListView(
         padding: EdgeInsets.only(top: 100.0),

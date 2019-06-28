@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:leiterify/screens/review-cards.dart';
+import 'package:leiterify/utils/platform.dart';
 
 import 'screens/home.dart';
 import 'screens/create-card.dart';
@@ -19,28 +19,90 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = App.of(context);
-    if (!data.loaded) return Container();
 
-    return CupertinoApp(
-      theme: CupertinoThemeData(
-        barBackgroundColor: CupertinoColors.white,
-        scaffoldBackgroundColor: CupertinoColors.lightBackgroundGray,
-      ),
+    return PlatformApp(
       home: HomeScreen(),
-      routes: {
-        '/create-card': (BuildContext context) {
-          final cardNumber = ModalRoute.of(context).settings.arguments;
-          return Container(
-            child: CreateCard(
-                cardNumber: cardNumber, totalCards: data.cardsPerDay),
-          );
-        },
-        '/creation-complete': (BuildContext context) => Container(
-              child: CreationComplete(),
-            ),
-        '/review-cards': (BuildContext context) =>
-            Container(child: ReviewCards()),
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          case '/create-card':
+            final Map<String, dynamic> args = settings.arguments;
+            final transition = args["replace"] == true
+                ? _getFadeTransition
+                : _getSlideTransition;
+
+            return PageRouteBuilder(
+              pageBuilder: (BuildContext context, _anim1, _anim2) {
+                return Container(
+                  child: CreateCard(
+                    cardNumber: args["cardNumber"],
+                    totalCards: data.cardsPerDay,
+                  ),
+                );
+              },
+              transitionsBuilder: transition,
+            );
+          case '/creation-complete':
+            return PageRouteBuilder(
+              pageBuilder: (BuildContext context, _anim1, _anim2) {
+                return Container(
+                  child: CompleteScreen(
+                    completeText: Text("Done Creating Cards!"),
+                    next: () =>
+                        navigateToReviewCards(context, App.of(context).day),
+                  ),
+                );
+              },
+              transitionsBuilder: _getSlideTransition,
+            );
+          case '/review-cards':
+            final ReviewCardsArguments args = settings.arguments;
+            final transition =
+                args.replace ? _getFadeTransition : _getSlideTransition;
+            return PageRouteBuilder(
+              settings: RouteSettings(arguments: args),
+              pageBuilder: (BuildContext context, _anim1, _anim2) {
+                return Container(child: ReviewCards());
+              },
+              transitionsBuilder: transition,
+            );
+          case '/review-complete':
+            return PageRouteBuilder(
+              pageBuilder: (BuildContext context, _anim1, _anim2) {
+                return CompleteScreen(
+                  completeText: Text("Done Reviewing Cards!"),
+                );
+              },
+              transitionsBuilder: _getSlideTransition,
+            );
+        }
       },
+    );
+  }
+
+  Widget _getSlideTransition(
+    BuildContext context,
+    Animation<double> anim,
+    Animation<double> anim1,
+    Widget child,
+  ) {
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(1, 0),
+        end: Offset.zero,
+      ).animate(anim),
+      child: child,
+    );
+  }
+
+  Widget _getFadeTransition(
+    BuildContext context,
+    Animation<double> anim,
+    Animation<double> anim1,
+    Widget child,
+  ) {
+    return FadeTransition(
+      opacity: anim,
+      child: child,
     );
   }
 }

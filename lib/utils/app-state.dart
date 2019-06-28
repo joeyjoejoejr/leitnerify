@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:leiterify/database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,6 +48,8 @@ class AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
+    if (!loaded) return Container(color: Colors.white);
+
     return _AppStateInherited(
       data: this,
       child: widget.child,

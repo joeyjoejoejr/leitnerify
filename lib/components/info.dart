@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:leiterify/utils/platform.dart';
 
 import '../utils/app-state.dart';
 import '../screens/review-cards.dart';
@@ -33,8 +33,8 @@ class Info extends StatelessWidget {
         child: Text(
           "Today",
           style: TextStyle(
-            fontSize: 32.0,
             fontWeight: FontWeight.bold,
+            fontSize: 32.0,
           ),
         ),
       ),
@@ -63,11 +63,11 @@ class Info extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 10.0),
         child: Container(
           child: isDoneToday
-              ? CupertinoButton.filled(
+              ? PlatformRaisedButton(
                   child: Text("Done For Today"),
                   onPressed: null,
                 )
-              : CupertinoButton.filled(
+              : PlatformRaisedButton(
                   child: Text("Get Started"),
                   onPressed: () {
                     var cardNumber = data.cardsAddedToday + 1;
@@ -77,7 +77,7 @@ class Info extends StatelessWidget {
                       Navigator.pushNamed(
                         context,
                         '/create-card',
-                        arguments: cardNumber,
+                        arguments: {"cardNumber": cardNumber},
                       );
                     }
                   },

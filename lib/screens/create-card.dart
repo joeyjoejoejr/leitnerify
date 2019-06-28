@@ -1,5 +1,4 @@
 import 'dart:ui' as ui;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -7,6 +6,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:leiterify/database.dart';
 import 'package:leiterify/utils/app-state.dart';
+import 'package:leiterify/utils/platform.dart';
 
 import '../utils/drawing-elements.dart';
 import '../models/models.dart' as models;
@@ -76,10 +76,10 @@ class CreateCardState extends State<CreateCard> {
   @override
   Widget build(BuildContext context) {
     final data = App.of(context);
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text("Add Card(${widget.cardNumber}/${widget.totalCards})"),
-        trailing: CupertinoButton(
+    return PlatformScaffold(
+      navigationBar: PlatformAppBar(
+        title: Text("Add Card(${widget.cardNumber}/${widget.totalCards})"),
+        trailing: PlatformFlatButton(
           padding: EdgeInsets.zero,
           child: Text("Create"),
           onPressed: () async {
@@ -95,60 +95,63 @@ class CreateCardState extends State<CreateCard> {
               Navigator.pushReplacementNamed(
                 context,
                 '/create-card',
-                arguments: cardNumber,
+                arguments: {"cardNumber": cardNumber, "replace": true},
               );
             }
           },
         ),
       ),
-      child: ListView(
-        padding: EdgeInsets.only(top: 100.0),
-        physics:
-            _selectedTool == Tool.text ? null : NeverScrollableScrollPhysics(),
-        children: [
-          Visibility(
-            child: Text(_currentSide.side),
-          ),
-          AspectRatio(
-            aspectRatio: 5.0 / 3.0,
-            child: Container(
-              color: Colors.white,
-              child: CardCreator(
-                color: _selectedColor,
-                tool: _selectedTool,
-                text: _currentSide.text,
-                textColor: _currentSide.textColor,
-                image: _currentSide.image,
-                elements: _currentSide.elements,
-                fill: _currentSide.backgroundFill,
-                onElementUpdate: (elements) =>
-                    setState(() => _currentSide.elements = elements),
-                onFillUpdate: (fill) =>
-                    setState(() => _currentSide.backgroundFill = fill),
+      child: Center(
+        child: ListView(
+          shrinkWrap: true,
+          physics: _selectedTool == Tool.text
+              ? null
+              : NeverScrollableScrollPhysics(),
+          children: [
+            Visibility(
+              child: Text(_currentSide.side),
+            ),
+            AspectRatio(
+              aspectRatio: 5.0 / 3.0,
+              child: Container(
+                color: Colors.white,
+                child: CardCreator(
+                  color: _selectedColor,
+                  tool: _selectedTool,
+                  text: _currentSide.text,
+                  textColor: _currentSide.textColor,
+                  image: _currentSide.image,
+                  elements: _currentSide.elements,
+                  fill: _currentSide.backgroundFill,
+                  onElementUpdate: (elements) =>
+                      setState(() => _currentSide.elements = elements),
+                  onFillUpdate: (fill) =>
+                      setState(() => _currentSide.backgroundFill = fill),
+                ),
               ),
             ),
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(vertical: 10.0),
-            child: _getToolBar(),
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(vertical: 10.0),
-            child: _getColorBar(),
-          ),
-        ]
-            .followedBy(_selectedTool == Tool.text
-                ? [
-                    Container(color: Colors.white, child: _getTextField()),
-                  ]
-                : [])
-            .toList(),
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 10.0),
+              child: _getToolBar(),
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 10.0),
+              child: _getColorBar(),
+            ),
+          ]
+              .followedBy(_selectedTool == Tool.text
+                  ? [
+                      Container(color: Colors.white, child: _getTextField()),
+                    ]
+                  : [])
+              .toList(),
+        ),
       ),
     );
   }
 
   Widget _getTextField() {
-    return CupertinoTextField(
+    return PlatformTextField(
       autofocus: true,
       placeholder: "Text to appear on card",
       controller: _currentSide.textController,

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:leiterify/utils/app-state.dart';
 
@@ -82,17 +81,19 @@ const colorForLevel = {
 class Calendar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [BoxShadow()],
-        color: CupertinoColors.white,
-      ),
-      height: 250,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10.0),
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: _generateCalendarDays(context),
+    return AspectRatio(
+      aspectRatio: 4.5 / 3.0,
+      child: Container(
+        decoration: BoxDecoration(
+          boxShadow: [BoxShadow()],
+          color: Colors.white,
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10.0),
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: _generateCalendarDays(context),
+          ),
         ),
       ),
     );
@@ -121,6 +122,7 @@ class Calendar extends StatelessWidget {
                     alignment: Alignment.bottomCenter,
                     child: Text(
                       j.toString(),
+                      textScaleFactor: 1,
                       style: TextStyle(color: colorForLevel[j]),
                     )),
               )

@@ -1,20 +1,17 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:leiterify/screens/review-cards.dart';
-import 'package:leiterify/utils/app-state.dart';
+import 'package:leiterify/utils/platform.dart';
 
-class CreationComplete extends StatelessWidget {
+class CompleteScreen extends StatelessWidget {
+  final Widget completeText;
+  final void Function() next;
+  CompleteScreen({@required this.completeText, this.next});
+
   @override
   Widget build(BuildContext context) {
-    final data = App.of(context);
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: Text("Continue"),
-          onPressed: () => navigateToReviewCards(context, data.day),
-        ),
-      ),
+    final nextButton = next != null ? _getButton(context) : null;
+
+    return PlatformScaffold(
+      navigationBar: PlatformAppBar(trailing: nextButton),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -29,6 +26,14 @@ class CreationComplete extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _getButton(context) {
+    return PlatformFlatButton(
+      padding: EdgeInsets.zero,
+      child: Text("Continue"),
+      onPressed: next,
     );
   }
 }
