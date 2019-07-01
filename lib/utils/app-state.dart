@@ -30,6 +30,18 @@ class AppState extends State<App> {
   bool get loaded => _loaded;
 
   int get cardsPerDay => _cardsPerDay;
+  Future<void> setCardsPerDay(int val) async {
+    final prefs = await SharedPreferences.getInstance();
+    final isSet = await prefs.setInt("cards_per_day", val);
+    final reviewCards = await getReviewCards(val: val);
+    if (isSet) {
+      setState(() {
+        _cardsPerDay = val;
+        _reviewCards = reviewCards;
+      });
+    }
+  }
+
   int get cardsAddedToday => _cardsAddedToday;
   set cardsAddedToday(int val) => setState(() => _cardsAddedToday = val);
   int get day => _day;
@@ -37,8 +49,16 @@ class AppState extends State<App> {
   List<LeitnerLevel> get reviewCards => _reviewCards;
 
   TimeOfDay get notificationTime => _notificationTime;
-  set notificationTime(TimeOfDay val) =>
-      setState(() => _notificationTime = val);
+  setNotificationTime(TimeOfDay val) async {
+    final hour = val == null ? null : val.hour;
+    final minute = val == null ? null : val.minute;
+    final prefs = await SharedPreferences.getInstance();
+    var didSet = await prefs.setInt('notification_hour', hour);
+    didSet = await prefs.setInt('notification_minute', minute);
+    if (didSet) setState(() => _notificationTime = val);
+  }
+
+  bool get shouldSendNotification => notificationTime != null;
 
   @override
   void initState() {
@@ -58,8 +78,6 @@ class AppState extends State<App> {
 
   _init() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    // TODO: Remove this
-    prefs.clear();
     final int day = prefs.getInt('day') ?? 1;
     final int cardsPerDay = prefs.getInt('cards_per_day') ?? 5;
     final int cardsAddedToday = await DbProvider.db.queryCardsCreatedToday();
@@ -69,26 +87,16 @@ class AppState extends State<App> {
                 prefs.getInt('completed_review_at'),
               )
             : null;
-
-    List<LeitnerLevel> reviewCards = [];
-    for (int level in leitnerDays[day]) {
-      final int count = await DbProvider.db.queryCardCountByLevel(level);
-
-      if (count != 0) {
-        reviewCards.add(LeitnerLevel(level, count));
-      } else if (level == 1) {
-        reviewCards.add(LeitnerLevel(level, count + cardsPerDay));
-      }
-    }
+    final reviewCards = await getReviewCards(val: cardsPerDay, newDay: day);
+    final hour = prefs.getInt('notification_hour');
+    final minute = prefs.getInt('notification_minute');
 
     setState(() {
       _cardsPerDay = cardsPerDay;
       _cardsAddedToday = cardsAddedToday;
       _day = day;
-      _notificationTime = TimeOfDay(
-        hour: prefs.getInt('notification_hour') ?? 17,
-        minute: prefs.getInt('notification_minute') ?? 0,
-      );
+      _notificationTime =
+          hour != null ? TimeOfDay(hour: hour, minute: minute) : null;
       _completedReviewAt = completedReviewAt;
       _reviewCards = reviewCards;
       _loaded = true;
@@ -108,6 +116,23 @@ class AppState extends State<App> {
 
   void completeLevel(int level) {
     _reviewCards.firstWhere((l) => level == l.level).isComplete = true;
+  }
+
+  Future<List<LeitnerLevel>> getReviewCards({int val, int newDay}) async {
+    List<LeitnerLevel> cards = [];
+    final perDay = val != null ? val : cardsPerDay;
+    final actualDay = newDay != null ? newDay : day;
+
+    for (int level in leitnerDays[actualDay]) {
+      final int count = await DbProvider.db.queryCardCountByLevel(level);
+
+      if (count != 0) {
+        cards.add(LeitnerLevel(level, count));
+      } else if (level == 1) {
+        cards.add(LeitnerLevel(level, count + perDay));
+      }
+    }
+    return cards;
   }
 }
 

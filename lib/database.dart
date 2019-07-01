@@ -19,7 +19,6 @@ class DbProvider {
   }
 
   initDB() async {
-    await Sqflite.devSetDebugModeOn(true);
     var databasePath = join(await getDatabasesPath(), 'lietnerify.db');
     deleteDatabase(databasePath);
     return await openDatabase(

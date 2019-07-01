@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:leiterify/screens/review-cards.dart';
+import 'package:leiterify/screens/settings.dart';
 import 'package:leiterify/utils/platform.dart';
 
 import 'screens/home.dart';
@@ -74,6 +75,18 @@ class MyApp extends StatelessWidget {
               },
               transitionsBuilder: _getSlideTransition,
             );
+          case '/settings':
+            return PageRouteBuilder(
+                pageBuilder: (BuildContext context, _anim1, _anim2) {
+                  return SettingsScreen();
+                },
+                transitionsBuilder: (ctx, an, an1, child) => SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 1),
+                        end: Offset.zero,
+                      ).animate(an),
+                      child: child,
+                    ));
         }
       },
     );
